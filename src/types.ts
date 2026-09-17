@@ -1,0 +1,189 @@
+export type Timeframe = 'M1' | 'M5' | 'M15';
+
+export type SignalDirection = 'CALL' | 'PUT';
+
+export type MartingaleMode = 'NONE' | 'GALE1';
+
+export interface AssetPair {
+  id: string;
+  name: string;
+  symbol: string;
+  type: 'FOREX' | 'OTC' | 'CRYPTO' | 'COMMODITIES';
+  payout: number;
+  basePrice: number;
+  decimals: number;
+  change24h: number;
+  isHot?: boolean;
+  activeId?: number;
+}
+
+export interface Candle {
+  time: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+}
+
+export interface EagleEyeAnalysis {
+  isValid: boolean;
+  verdict: 'CLEAR' | 'CAUTION' | 'BLOCKED';
+  rejectionWickDetected: boolean;
+  isToxicZone: boolean;
+  toxicZoneReason?: string;
+  threeCandleMomentum: 'STRONG' | 'EXHAUSTED' | 'NEUTRAL';
+  bodyRatioAverage: number;
+  safetyScore: number; // 0 - 100
+  notes: string[];
+}
+
+export interface SocialSentiment {
+  crowdScore: number; // 0 - 100 (Bullish bias %)
+  bearishScore: number; // 100 - crowdScore
+  bias: 'BULLISH' | 'BEARISH' | 'NEUTRAL';
+  activeSignalsDetected: number;
+  divergenceAlert: boolean; // Prisma vs Crowd divergence
+  sampleSources: {
+    channel: string;
+    text: string;
+    bias: 'CALL' | 'PUT';
+    timeAgo: string;
+  }[];
+}
+
+export interface OtcManipulationAnalysis {
+  status: 'ORGANIC' | 'SUSPICIOUS' | 'MANIPULATION_DETECTED';
+  stopHuntDetected: boolean;
+  tickJitterScore: number; // Regularity score
+  syntheticAnomalyRate: number; // %
+  isSafeToTrade: boolean;
+  warningMessage?: string;
+}
+
+export type MicroPattern = 'clean_engulfing' | 'exhaustion' | 'liquidity_trap' | 'indecision' | null;
+export type DangerFlag = 'otc_manipulation' | 'toxic_overlap' | 'momentum_loss' | null;
+export type CleanEntryAction = 'EXECUTE' | 'WAIT_NEXT_CANDLE' | 'BLOCK';
+
+export interface CleanEntryCheck {
+  entry_valid: boolean; // true = ATIRA | false = BLOQUEIA
+  confidence: number; // 0-100 (apenas se entry_valid=true)
+  micro_pattern: MicroPattern;
+  danger_flag: DangerFlag;
+  action: CleanEntryAction;
+  details?: {
+    rejectionVerdict: 'GENUINE_REJECTION' | 'VOLATILITY_WICK' | 'NONE';
+    momentumSolidBody: boolean;
+    isEngulfedOverlap: boolean;
+    liquidityTrap: boolean;
+    tickVelocity: 'ACCELERATING' | 'DECELERATING' | 'ORGANIC' | 'ERRATIC';
+    lastCandleBodyRatio: number;
+    notes?: string[];
+  };
+}
+
+export interface PredictiveZones {
+  takeProfitPrice: number;
+  stopLossPrice: number;
+  probabilityScore: number; // 0 - 100
+  heatmapColor: 'green' | 'yellow' | 'red';
+  structureLow: number;
+  structureHigh: number;
+}
+
+export interface BullBearAnalysis {
+  bullPct: number;
+  bearPct: number;
+  dominant: 'bull' | 'bear' | null;
+  force: number;
+  statusText: string;
+}
+
+export interface SniperSignal {
+  id: string;
+  assetId: string;
+  assetName: string;
+  direction: SignalDirection;
+  timeframe: Timeframe;
+  entryTime: string;
+  countdownSeconds: number;
+  confidence: number;
+  bullPct?: number;
+  bearPct?: number;
+  force?: number;
+  entryPrice?: number;
+  exitPrice?: number;
+  diff?: number;
+  confluenceFactors: string[];
+  status: 'ANALYZING' | 'READY' | 'EXECUTING' | 'WIN' | 'LOSS';
+  result?: 'WIN' | 'WIN_GALE1' | 'WIN_GALE2' | 'LOSS';
+  galeStage?: 0 | 1;
+  payout: number;
+  cleanEntryCheck?: CleanEntryCheck;
+  createdAt: number;
+}
+
+export interface ServerNode {
+  id: string;
+  name: string;
+  location: string;
+  country: string;
+  ping: number;
+  status: 'ONLINE' | 'OPTIMAL' | 'SYNCING';
+  ipMasked: string;
+  role: string;
+}
+
+export type AccountMode = 'REAL' | 'DEMO';
+export type BrokerExecutionMode = 'OFF' | 'DEMO' | 'REAL';
+
+export interface BrokerExecutionResult {
+  success: boolean;
+  optionId?: number | string;
+  activeId?: number;
+  direction?: string;
+  amount?: number;
+  expired?: number;
+  userBalanceId?: number;
+  accountMode?: AccountMode;
+  message?: string;
+  error?: string;
+}
+
+export interface BrokerSession {
+  ssid: string;
+  email: string;
+  password?: string;
+  rememberCredentials?: boolean;
+  accountMode: AccountMode;
+  realBalance: number;
+  demoBalance: number;
+  isConnected: boolean;
+  latencyMs: number;
+  lastSync: number;
+  serverUrl: string;
+  userName?: string;
+  currency?: string;
+  userId?: number | string;
+  realBalanceId?: number;
+  demoBalanceId?: number;
+  brokerExecutionMode?: BrokerExecutionMode;
+  autoTradeEnabled?: boolean;
+}
+
+export interface TradeOrder {
+  id: string;
+  assetName: string;
+  direction: SignalDirection;
+  amount: number;
+  entryPrice: number;
+  exitPrice?: number;
+  payout: number;
+  timeframe: Timeframe;
+  timestamp: number;
+  status: 'OPEN' | 'WON' | 'LOST';
+  profit?: number;
+  accountMode?: AccountMode;
+  brokerOptionId?: number | string;
+  executedOnBroker?: boolean;
+}
